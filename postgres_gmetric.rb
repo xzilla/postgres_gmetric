@@ -3,7 +3,7 @@
 #
 # == Install Dependencies ==
 #
-# sudo apt-get install ruby postgresql-server-dev-8.3 rubygems ruby-dev
+# sudo apt-get install ruby postgresql-server-dev-8.3 rubygems ruby-dev ganglia-monitor
 # sudo gem install postgres pg ruby-pg
 #
 # == Usage ==
@@ -16,10 +16,12 @@
 require 'rubygems'
 require 'pg'
 
-database=ARGV[0]
+(puts "FATAL: gmetric not found" ; exit 1) if !File.exists? "/usr/bin/gmetric"
+
+$database=ARGV[0]
 
 def query(sql)
-  `psql -U darwin darwin -A -c "#{sql}"`
+  `psql -U #{$database} #{$database} -A -c "#{sql}"`
 end
 
 def publish(sql)
@@ -28,8 +30,9 @@ def publish(sql)
   values=lines[1].split('|')
   col=0
   lines[0].split('|').each do |colname|
-    puts "#{colname}=#{values[col]}"
-    `gmetric --name "pg_#{colname}" --value #{values[col]} --type float --dmax=240`
+    v=values[col]
+    puts "#{colname}=#{v}"
+    `gmetric --name "pg_#{colname}" --value #{v} --type float --dmax=240`
     col=col+1
   end
 end
@@ -47,8 +50,8 @@ publish "SELECT sum(pg_relation_size(c.oid)) as size_index FROM pg_class c, pg_n
 publish "SELECT sum(pg_relation_size(c.oid)) as size_relation FROM pg_class c, pg_namespace n WHERE (relkind = 'i' OR relkind = 'r') AND n.oid = c.relnamespace;"
 publish "select count(*) as backends_waiting from pg_stat_activity where waiting = 't';"
 publish "SELECT (SELECT count(*) FROM pg_locks) as locks"
-publish "SELECT max(COALESCE(ROUND(EXTRACT(epoch FROM now()-query_start)),0)) as query_time_max FROM pg_stat_activity WHERE current_query <> '<IDLE>';"
-publish "SELECT max(COALESCE(ROUND(EXTRACT(epoch FROM now()-query_start)),0)) as query_time_idle_in_txn FROM pg_stat_activity WHERE current_query = '<IDLE> in transaction';"
+publish "SELECT COALESCE(max(COALESCE(ROUND(EXTRACT(epoch FROM now()-query_start)),0)),0) as query_time_max FROM pg_stat_activity WHERE current_query <> '<IDLE>';"
+publish "SELECT COALESCE(max(COALESCE(ROUND(EXTRACT(epoch FROM now()-query_start)),0)),0) as query_time_idle_in_txn FROM pg_stat_activity WHERE current_query = '<IDLE> in transaction';"
 publish "SELECT max(COALESCE(ROUND(EXTRACT(epoch FROM now()-xact_start)),0)) as txn_time_max FROM pg_stat_activity WHERE xact_start IS NOT NULL;"
 publish "SELECT max(age(datfrozenxid)) as datfrozenxid_age FROM pg_database WHERE datallowconn;"
 publish "SELECT count(*) as wal_files FROM pg_ls_dir('pg_xlog') WHERE pg_ls_dir ~ E'^[0-9A-F]{24}$';"
