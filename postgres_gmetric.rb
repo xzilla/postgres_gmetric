@@ -11,7 +11,7 @@
 #
 # Author: Nicolas Marchildon <nicolas@marchildon.net>
 # Date: 2009-07
-# 
+# http://github.com/elecnix/postgres_gmetric
 
 (puts "FATAL: gmetric not found" ; exit 1) if !File.exists? "/usr/bin/gmetric"
 
