@@ -3,8 +3,7 @@
 #
 # == Install Dependencies ==
 #
-# sudo apt-get install ruby postgresql-server-dev-8.3 rubygems ruby-dev ganglia-monitor build-essential
-# sudo gem install postgres pg ruby-pg
+# sudo apt-get install ruby ganglia-monitor build-essential
 #
 # == Usage ==
 #
@@ -13,8 +12,6 @@
 # Author: Nicolas Marchildon <nicolas@marchildon.net>
 # Date: 2009-07
 # 
-require 'rubygems'
-require 'pg'
 
 (puts "FATAL: gmetric not found" ; exit 1) if !File.exists? "/usr/bin/gmetric"
 
