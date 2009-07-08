@@ -3,7 +3,7 @@
 #
 # == Install Dependencies ==
 #
-# sudo apt-get install ruby postgresql-server-dev-8.3 rubygems ruby-dev ganglia-monitor
+# sudo apt-get install ruby postgresql-server-dev-8.3 rubygems ruby-dev ganglia-monitor build-essential
 # sudo gem install postgres pg ruby-pg
 #
 # == Usage ==
@@ -31,7 +31,7 @@ def publish(sql)
   col=0
   lines[0].split('|').each do |colname|
     v=values[col]
-    puts "#{colname}=#{v}"
+    #puts "#{colname}=#{v}"
     `gmetric --name "pg_#{colname}" --value #{v} --type float --dmax=240`
     col=col+1
   end
