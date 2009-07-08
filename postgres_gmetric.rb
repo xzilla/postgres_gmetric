@@ -12,13 +12,39 @@
 # Author: Nicolas Marchildon <nicolas@marchildon.net>
 # Date: 2009-07
 # http://github.com/elecnix/postgres_gmetric
+require 'optparse'
 
 (puts "FATAL: gmetric not found" ; exit 1) if !File.exists? "/usr/bin/gmetric"
 
-$database=ARGV[0]
+$options = {}
+optparse = OptionParser.new do |opts|
+  opts.banner = "Usage: postgres_gmetric.rb [-U <user>] <database>"
+
+  # Define the options, and what they do
+  $options[:verbose] = false
+  opts.on( '-v', '--verbose', 'Output collected data' ) do
+    $options[:verbose] = true
+  end
+
+  $options[:user] = ENV['USER']
+  opts.on( '-U', '--user USER', 'Connect as USER' ) do |user|
+    $options[:user] = user
+  end
+
+  opts.on( '-h', '--help', 'Display this screen' ) do
+    puts opts
+    exit
+  end
+end
+optparse.parse!
+
+$options[:database]=ARGV[0]
+
+(puts "Missing database"; exit 1) if $options[:database].empty?
+(puts "Missing user"; exit 1) if $options[:user].nil?
 
 def query(sql)
-  `psql -U #{$database} #{$database} -A -c "#{sql}"`
+  `psql -U #{$options[:user]} #{$options[:database]} -A -c "#{sql}"`
 end
 
 def publish(sql)
@@ -28,7 +54,7 @@ def publish(sql)
   col=0
   lines[0].split('|').each do |colname|
     v=values[col]
-    #puts "#{colname}=#{v}"
+    puts "#{colname}=#{v}" if $options[:verbose]
     `gmetric --name "pg_#{colname}" --value #{v} --type float --dmax=240`
     col=col+1
   end
