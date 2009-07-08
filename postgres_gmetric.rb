@@ -39,7 +39,7 @@ publish "select sum(numbackends) as backends, sum(xact_commit) as xact_commit, s
 publish "select sum(seq_scan) as seq_scan, sum(seq_tup_read) as seq_tup_read, sum(idx_scan) as idx_scan, sum(idx_tup_fetch) as idx_tup_fetch, sum(n_tup_ins) as n_tup_ins, sum(n_tup_upd) as n_tup_upd, sum(n_tup_del) as n_tup_del, sum(n_tup_hot_upd) as n_tup_hot_upd, sum(n_live_tup) as n_live_tup, sum(n_dead_tup) as n_dead_tup from pg_stat_all_tables;"
 publish "select sum(heap_blks_read) as heap_blks_read, sum(heap_blks_hit) as heap_blks_hit, sum(idx_blks_read) as idx_blks_read_tbl, sum(idx_blks_hit) as idx_blks_hit_tbl, sum(toast_blks_read) as toast_blks_read, sum(toast_blks_hit) as toast_blks_hit, sum(tidx_blks_read) as tidx_blks_read, sum(tidx_blks_hit) as tidx_blks_hit from pg_statio_all_tables;"
 publish "select sum(idx_blks_read) as idx_blks_read, sum(idx_blks_hit) as idx_blks_hit from pg_statio_all_indexes;"
-publish "select sum(blks_read) as seq_blks_read, sum(blks_hit) as seq_blks_hit from pg_statio_all_sequences;"
+publish "select COALESCE(sum(blks_read), 0) as seq_blks_read, COALESCE(sum(blks_hit), 0) as seq_blks_hit from pg_statio_all_sequences;"
 # publish check_postgres bloat
 publish "SELECT sum(pg_database_size(d.oid)) as size_database FROM pg_database d ORDER BY 1 DESC LIMIT 10;"
 publish "SELECT sum(pg_relation_size(c.oid)) as size_table FROM pg_class c, pg_namespace n WHERE (relkind = 'r') AND n.oid = c.relnamespace;"
