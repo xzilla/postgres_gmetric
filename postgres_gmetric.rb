@@ -26,7 +26,7 @@ optparse = OptionParser.new do |opts|
     $options[:verbose] = true
   end
 
-  $options[:user] = ENV['USER']
+  $options[:user] = ENV['LOGNAME']
   opts.on( '-U', '--user USER', 'Connect as USER' ) do |user|
     $options[:user] = user
   end
